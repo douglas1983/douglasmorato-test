@@ -1,5 +1,7 @@
 const express = require('express');
 
+const verifyJWT = require('../middleware/verifyJWT');
+
 const router = express.Router();
 const UserService = require('../services/userService');
 
@@ -16,7 +18,7 @@ router.get('/users/:id', async (req, res) => {
 });
 
 // eslint-disable-next-line complexity
-router.post('/users', async (req, res) => {
+const postuser = async (req, res) => {
   const user = req.body;
 
   if (!user.email || !user.password || !user.name) {
@@ -31,7 +33,17 @@ router.post('/users', async (req, res) => {
 
   const status = !retorno.user ? 409 : 201;
 
-  res.status(status).send(retorno);
+  return res.status(status).send(retorno);
+};
+
+router.post('/users', postuser);
+
+router.post('/users/admin', verifyJWT, async (req, res) => {
+  if (req.decoded.role !== 'admin') {
+    return res.status(403).json({ message: 'Only admins can register new admins' });
+  }
+  req.body = { ...req.body, role: 'admin' };
+  return postuser(req, res);
 });
 
 module.exports = {

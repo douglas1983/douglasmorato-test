@@ -6,7 +6,8 @@ class UserService {
     if (user) {
       return { message: 'Email already registered' };
     }
-    return UserModel.insert({ ...data, role: 'user' });
+    const insertdata = data.role ? data : { ...data, role: 'user' };
+    return UserModel.insert(insertdata);
   }
 
   static async getAll() {
