@@ -4,33 +4,27 @@ const router = express.Router();
 
 const jwt = require('jsonwebtoken');
 
-const verifyJWT = require('../../utils/verifyJWT');
 const userService = require('../services/userService');
-
-router.post('/logged', verifyJWT, async (req, res, _next) => {
-  const funcionario = await userService.getById(req.decoded.id);
-  return res.json({
-    auth: true,
-    funcionario,
-  });
-});
 
 router.post('/login', async (req, res, _next) => {
   // esse teste abaixo deve ser feito no seu banco de dados
 
-  const user = await userService.getByLogin(req.body.user);
-
-  if (user && req.body.password === user.password) {
-    // auth ok
-    const { id } = user; // esse id viria do banco de dados
-    const nome = user.name;
-    const token = jwt.sign({ id, nome }, process.env.SECRET, {
-      expiresIn: 60 * 60 * 8, // expires in 8 horas
-    });
-    return res.json({ auth: true, token, user });
+  if (!req.body.email || !req.body.password) {
+    return res.status(401).json({ message: 'All fields must be filled' });
   }
 
-  res.status(401).json({ message: 'Login ou senha inválidos!' });
+  const user = await userService.getByLogin(req.body.email);
+
+  if (!user || req.body.password !== user.password) {
+    return res.status(401).json({ message: 'Incorrect username or password' });
+  }
+  // auth ok
+  const { id } = user; // esse id viria do banco de dados
+  const nome = user.name;
+  const token = jwt.sign({ id, nome }, 'mysecret', {
+    expiresIn: 60 * 60 * 8, // expires in 8 horas
+  });
+  return res.status(200).json({ token });
 });
 
 module.exports = {
