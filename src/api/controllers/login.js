@@ -19,9 +19,9 @@ router.post('/login', async (req, res, _next) => {
     return res.status(401).json({ message: 'Incorrect username or password' });
   }
   // auth ok
-  const { id } = user; // esse id viria do banco de dados
-  const nome = user.name;
-  const token = jwt.sign({ id, nome }, 'mysecret', {
+  const { _id, name } = user; // esse id viria do banco de dados
+
+  const token = jwt.sign({ _id, name }, 'mysecret', {
     expiresIn: 60 * 60 * 8, // expires in 8 horas
   });
   return res.status(200).json({ token });

@@ -1,29 +1,24 @@
-// const userModel = require('../models/userModel');
-const users = [
-  { name: 'admin', email: 'root@email.com', password: 'admin', role: 'admin' },
-  { name: 'Erick Jacquin', email: 'erickjacquin@gmail.com', password: '12345678', role: 'user' },
-];
+const UserModel = require('../models/userModel');
+
 class UserService {
   static async insert(data) {
-    return users.push(data);
+    const user = await UserModel.findByEmail(data.email);
+    if (user) {
+      return { message: 'Email already registered' };
+    }
+    return UserModel.insert({ ...data, role: 'user' });
   }
 
   static async getAll() {
-    return users;
+    return UserModel.findAll();
   }
 
   static async getById(id) {
-    return {
-      id,
-      name: 'Erick Jacquin',
-      email: 'erickjacquin@gmail.com',
-      password: '12345678',
-      role: 'user',
-    };
+    return UserModel.findByEmail(id);
   }
 
   static async getByLogin(login) {
-    return users.find((user) => user.email === login);
+    return UserModel.findByEmail(login);
   }
 }
 

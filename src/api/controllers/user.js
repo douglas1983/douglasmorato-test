@@ -1,49 +1,35 @@
 const express = require('express');
 
 const router = express.Router();
-
-const verifyJWT = require('../middleware/verifyJWT');
-
 const UserService = require('../services/userService');
 
-router.get('/users', verifyJWT, async (req, res) => {
+const validatorEmail = require('../../utils/validatorEmail');
+
+router.get('/users', async (req, res) => {
   res.json(await UserService.getAll(req));
 });
 
-router.get('/users/:id', verifyJWT, async (req, res) => {
+router.get('/users/:id', async (req, res) => {
   const id = parseInt(req.params.id, 10);
 
   res.json(await UserService.getById(id));
 });
 
-router.post('/users', verifyJWT, async (req, res) => {
-  const retorno = await UserService.insert(req.body);
+// eslint-disable-next-line complexity
+router.post('/users', async (req, res) => {
+  const user = req.body;
 
-  const status = retorno.nativeError ? 422 : 200;
-
-  res.status(status).send(retorno);
-});
-
-router.put('/users/:id', verifyJWT, async (req, res) => {
-  const id = parseInt(req.params.id, 10);
-
-  if (id !== req.body.id) {
-    res.json('ID do parametro é diferente do ID do corpo da Área');
-    console.log('ID do parametro é diferente do ID do corpo da Área');
-    throw new Error('ID do parametro é diferente do ID do corpo da Área');
+  if (!user.email || !user.password || !user.name) {
+    return res.status(400).json({ message: 'Invalid entries. Try again.' });
   }
 
-  const religiao = await UserService.getById(id);
-
-  if (religiao.length <= 0) {
-    res.json('Área não encontrado para o id');
-    console.log('Área não encontrado para o id');
-    throw new Error('Área não encontrado para o id');
+  if (!validatorEmail(user.email)) {
+    return res.status(400).json({ message: 'Invalid entries. Try again.' });
   }
 
-  const retorno = await UserService.insert(req.body);
+  const retorno = await UserService.insert(user);
 
-  const status = retorno.nativeError ? 422 : 200;
+  const status = !retorno.user ? 409 : 201;
 
   res.status(status).send(retorno);
 });
