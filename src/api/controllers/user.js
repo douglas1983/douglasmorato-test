@@ -17,23 +17,17 @@ router.get('/users/:id', async (req, res) => {
   res.json(await UserService.getById(id));
 });
 
-// eslint-disable-next-line complexity
 const postuser = async (req, res) => {
   const user = req.body;
 
-  if (!user.email || !user.password || !user.name) {
+  const isnotvalid = !user.email || !user.password || !user.name || !validatorEmail(user.email);
+
+  if (isnotvalid) {
     return res.status(400).json({ message: 'Invalid entries. Try again.' });
   }
-
-  if (!validatorEmail(user.email)) {
-    return res.status(400).json({ message: 'Invalid entries. Try again.' });
-  }
-
   const retorno = await UserService.insert(user);
 
-  const status = !retorno.user ? 409 : 201;
-
-  return res.status(status).send(retorno);
+  return res.status(retorno.status).send(retorno.return);
 };
 
 router.post('/users', postuser);

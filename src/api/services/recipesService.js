@@ -1,41 +1,35 @@
-// const userModel = require('../models/userModel');
-const recipes = [
-  {
-    name: 'Frango do jacquin',
-    ingredients: 'Frango',
-    preparation: '10 min no forno',
-  },
-  {
-    name: 'Frango do jacquin',
-    ingredients: 'Frango',
-    preparation: '10 min no forno',
-  },
-];
+const RecipeModel = require('../models/recipeModel');
+
 class RecipesService {
   static async insert(data) {
-    return recipes.push(data);
+    try {
+      const inserted = await RecipeModel.insert(data);
+      console.log(inserted);
+      return { status: 201, return: inserted };
+    } catch (error) {
+      return { status: 500, return: { message: error } };
+    }
   }
 
   static async update(data) {
-    return recipes.push(data);
+    // return recipes.push(data);
+    return data;
   }
 
   static async delete(data) {
-    return recipes.push(data);
+    return data;
   }
 
   static async getAll() {
-    return recipes;
+    return RecipeModel.findAll();
   }
 
   static async getById(id) {
-    return {
-      id,
-      name: 'Erick Jacquin',
-      email: 'erickjacquin@gmail.com',
-      password: '12345678',
-      role: 'user',
-    };
+    const recipe = await RecipeModel.findById(id);
+
+    return recipe
+      ? { status: 200, return: recipe }
+      : { status: 404, return: { message: 'recipe not found' } };
   }
 }
 

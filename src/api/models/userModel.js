@@ -38,7 +38,7 @@ class UserModel {
       const db = client.db(dbName);
       const collection = db.collection('users');
       const insertResult = await collection.insertOne(data);
-      // eslint-disable-next-line no-underscore-dangle
+
       const user = await this.findById(insertResult.ops[0]._id);
       return { user };
     } catch (error) {

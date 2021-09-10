@@ -4,10 +4,11 @@ class UserService {
   static async insert(data) {
     const user = await UserModel.findByEmail(data.email);
     if (user) {
-      return { message: 'Email already registered' };
+      return { status: 409, return: { message: 'Email already registered' } };
     }
     const insertdata = data.role ? data : { ...data, role: 'user' };
-    return UserModel.insert(insertdata);
+    const inserted = await UserModel.insert(insertdata);
+    return { status: 201, return: inserted };
   }
 
   static async getAll() {

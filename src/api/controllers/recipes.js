@@ -6,22 +6,29 @@ const verifyJWT = require('../middleware/verifyJWT');
 
 const RecipesService = require('../services/recipesService');
 
-router.get('/recipes', verifyJWT, async (req, res) => {
+router.get('/recipes', async (req, res) => {
   res.json(await RecipesService.getAll(req));
 });
 
-router.get('/recipes/:id', verifyJWT, async (req, res) => {
-  const id = parseInt(req.params.id, 10);
+router.get('/recipes/:id', async (req, res) => {
+  const { id } = req.params;
 
-  res.json(await RecipesService.getById(id));
+  const retorno = await RecipesService.getById(id);
+  console.log(retorno);
+  return res.status(retorno.status).send(retorno.return);
 });
 
 router.post('/recipes', verifyJWT, async (req, res) => {
-  const retorno = await RecipesService.insert(req.body);
+  const recipe = req.body;
 
-  const status = retorno.nativeError ? 422 : 200;
+  const isnotvalid = !recipe.name || !recipe.ingredients || !recipe.preparation;
 
-  res.status(status).send(retorno);
+  if (isnotvalid) {
+    return res.status(400).json({ message: 'Invalid entries. Try again.' });
+  }
+  const retorno = await RecipesService.insert(recipe);
+
+  return res.status(retorno.status).send(retorno.return);
 });
 
 router.put('/recipes/:id', verifyJWT, async (req, res) => {
