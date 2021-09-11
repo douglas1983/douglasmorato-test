@@ -13,7 +13,14 @@ class RecipesService {
   }
 
   static async delete(id) {
-    return RecipeModel.deleteById(id);
+    try {
+      const retorno = await RecipeModel.deleteById(id);
+      return retorno.deletedCount === 1
+        ? { status: 204 }
+        : { status: 404, return: { message: 'recipe not found' } };
+    } catch (error) {
+      return { status: 500, return: { message: error } };
+    }
   }
 
   static async getAll() {

@@ -31,7 +31,7 @@ class RecipeModel {
   static async insertOrUpdate(param) {
     try {
       const data = param;
-      const oId = ObjectId(data._id);
+      const oId = ObjectId(data.userId);
       const collection = await RecipeModel.collection();
       const id = data._id;
       delete data._id;

@@ -18,6 +18,7 @@ const postOrPut = async (req, res) => {
   const data = id
     ? { ...recipe, _id: id, userId: req.decoded._id }
     : { ...recipe, userId: req.decoded._id };
+  console.log(data, req.decoded);
   return RecipesService.upsert(data);
 };
 
@@ -28,25 +29,35 @@ router.get('/recipes', async (req, res) => {
 router.get('/recipes/:id', async (req, res) => {
   const { id } = req.params;
 
-  const retorno = await RecipesService.getById(id);
-  return res.status(retorno.status).send(retorno.return);
+  const data = await RecipesService.getById(id);
+  return res.status(data.status).send(data.return);
 });
 
 router.post('/recipes', verifyJWT, async (req, res) => {
-  const retorno = await postOrPut(req, res);
+  const data = await postOrPut(req, res);
 
-  return res.status(retorno.status).send(retorno.return);
+  return res.status(data.status).send(data.return);
 });
 
 router.put('/recipes/:id', verifyJWT, async (req, res) => {
-  const retorno = await postOrPut(req, res);
-  return res.status(retorno.status).send(retorno.return);
+  const { id } = req.params;
+  const recipe = (await RecipesService.getById(id)).return;
+  if (req.decoded.role === 'admin' || req.decoded._id === recipe.userId.toString()) {
+    const data = await postOrPut(req, res);
+    return res.status(data.status).send(data.return);
+  }
+  return res.status(401).send({ message: 'not authorized' });
 });
 
 router.delete('/recipes/:id', verifyJWT, async (req, res) => {
   const { id } = req.params;
-  const retorno = await RecipesService.delete(id);
-  return res.status(retorno.status).send(retorno.return);
+  const recipe = (await RecipesService.getById(id)).return;
+
+  if (req.decoded.role === 'admin' || req.decoded._id === recipe.userId.toString()) {
+    const data = await RecipesService.delete(id);
+    return res.status(data.status).send(data.return);
+  }
+  return res.status(401).send({ message: 'not authorized' });
 });
 
 module.exports = {
