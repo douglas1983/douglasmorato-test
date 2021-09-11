@@ -11,9 +11,14 @@ class RecipeModel {
     return collection.find({}).toArray();
   }
 
+  static async deleteById(id) {
+    const oId = new ObjectId(id);
+    const collection = await RecipeModel.collection();
+    return collection.deleteOne({ _id: oId });
+  }
+
   static async findById(id) {
     if (id.length !== 12 && id.length !== 24) {
-      console.log(id.length);
       return undefined;
     }
     const oId = new ObjectId(id);
@@ -23,12 +28,22 @@ class RecipeModel {
     return recipe[0];
   }
 
-  static async insert(data) {
+  static async insertOrUpdate(param) {
     try {
+      const data = param;
+      const oId = ObjectId(data._id);
       const collection = await RecipeModel.collection();
-      const insertResult = await collection.insertOne(data);
+      const id = data._id;
+      delete data._id;
 
-      const recipe = { recipe: insertResult.ops[0] };
+      const insertResult = id
+        ? await collection.findOneAndUpdate(
+            { _id: ObjectId(id) },
+            { $set: { ...data, userId: oId } },
+            { returnOriginal: false },
+          )
+        : await collection.insertOne({ ...data, userId: oId });
+      const recipe = insertResult.ops ? { recipe: insertResult.ops[0] } : { ...insertResult.value };
 
       return recipe;
     } catch (error) {

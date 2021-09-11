@@ -19,7 +19,6 @@ class UserModel {
     const collection = db.collection('users');
     const user = await collection.find({ _id: id }, { projection: { password: 0 } }).toArray();
 
-    console.log(user);
     return user[0];
   }
 

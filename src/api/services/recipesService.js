@@ -1,23 +1,19 @@
 const RecipeModel = require('../models/recipeModel');
 
 class RecipesService {
-  static async insert(data) {
+  static async upsert(data) {
     try {
-      const inserted = await RecipeModel.insert(data);
-      console.log(inserted);
-      return { status: 201, return: inserted };
+      const status = data._id ? 200 : 201;
+      const inserted = await RecipeModel.insertOrUpdate(data);
+      console.log(inserted, 'service');
+      return { status, return: inserted };
     } catch (error) {
       return { status: 500, return: { message: error } };
     }
   }
 
-  static async update(data) {
-    // return recipes.push(data);
-    return data;
-  }
-
-  static async delete(data) {
-    return data;
+  static async delete(id) {
+    return RecipeModel.deleteById(id);
   }
 
   static async getAll() {
