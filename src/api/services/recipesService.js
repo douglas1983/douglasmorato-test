@@ -5,7 +5,6 @@ class RecipesService {
     try {
       const status = data._id ? 200 : 201;
       const inserted = await RecipeModel.insertOrUpdate(data);
-      console.log(inserted, 'service');
       return { status, return: inserted };
     } catch (error) {
       return { status: 500, return: { message: error } };

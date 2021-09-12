@@ -7,8 +7,6 @@ const jwt = require('jsonwebtoken');
 const userService = require('../services/userService');
 
 router.post('/login', async (req, res, _next) => {
-  // esse teste abaixo deve ser feito no seu banco de dados
-
   if (!req.body.email || !req.body.password) {
     return res.status(401).json({ message: 'All fields must be filled' });
   }
