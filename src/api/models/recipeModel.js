@@ -1,20 +1,17 @@
-const { MongoClient, ObjectId } = require('mongodb');
+const { ObjectId } = require('mongodb');
 
-const url = process.env.MONGO_DB_URL;
-const client = new MongoClient(url, { useUnifiedTopology: true });
+const collection = require('../config/mongoconfig');
 
-// Database Name
-const dbName = process.env.DB_NAME;
 class RecipeModel {
   static async findAll() {
-    const collection = await RecipeModel.collection();
-    return collection.find({}).toArray();
+    const collect = await collection('recipes');
+    return collect.find({}).toArray();
   }
 
   static async deleteById(id) {
     const oId = new ObjectId(id);
-    const collection = await RecipeModel.collection();
-    return collection.deleteOne({ _id: oId });
+    const collect = await collection('recipes');
+    return collect.deleteOne({ _id: oId });
   }
 
   static async findById(id) {
@@ -22,8 +19,8 @@ class RecipeModel {
       return undefined;
     }
     const oId = new ObjectId(id);
-    const collection = await RecipeModel.collection();
-    const recipe = await collection.find({ _id: oId }).toArray();
+    const collect = await collection('recipes');
+    const recipe = await collect.find({ _id: oId }).toArray();
 
     return recipe[0];
   }
@@ -32,30 +29,23 @@ class RecipeModel {
     try {
       const data = param;
       const oId = ObjectId(data.userId);
-      const collection = await RecipeModel.collection();
+      const collect = await collection('recipes');
       const id = data._id;
       delete data._id;
 
       const insertResult = id
-        ? await collection.findOneAndUpdate(
+        ? await collect.findOneAndUpdate(
             { _id: ObjectId(id) },
             { $set: { ...data, userId: oId } },
             { returnOriginal: false },
           )
-        : await collection.insertOne({ ...data, userId: oId });
+        : await collect.insertOne({ ...data, userId: oId });
       const recipe = insertResult.ops ? { recipe: insertResult.ops[0] } : { ...insertResult.value };
 
       return recipe;
     } catch (error) {
       return { message: error };
     }
-  }
-
-  static async collection() {
-    await client.connect();
-    const db = client.db(dbName);
-    const collection = db.collection('recipes');
-    return collection;
   }
 }
 module.exports = RecipeModel;
