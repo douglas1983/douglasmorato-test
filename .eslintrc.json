@@ -6,6 +6,6 @@
   },
   "rules": {
     "sonarjs/no-duplicate-string": ["error", 5],
-    "no-underscore-dangle": [2, { "allow": ["_id"] }]
+    "no-underscore-dangle": [2, { "allow": ["_id", "_eventsCount"] }]
   }
 }
